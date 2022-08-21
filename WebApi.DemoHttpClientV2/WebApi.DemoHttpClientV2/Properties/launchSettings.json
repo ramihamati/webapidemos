@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "WebApi.DemoHttpClientV2": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
