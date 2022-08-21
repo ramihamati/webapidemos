@@ -14,6 +14,30 @@ internal static class Program
     {
         CreateLogger();
 
+        //HttpResponseMessage response1 = await RequestWithCertificateAndHttp1();
+        HttpResponseMessage response2 = await RequestWithCertificateAndHttp2();
+    }
+
+    private static async Task<HttpResponseMessage> RequestWithCertificateAndHttp1()
+    {
+        HttpClient httpClient = new(GetDelegatingHandler())
+        {
+            BaseAddress = new Uri(
+                uriString: "https://127.0.0.1:6000/api/employees/",
+                uriKind: UriKind.Absolute)
+        };
+
+        HttpRequestMessage message = new(
+            method: HttpMethod.Get,
+            requestUri: new Uri("employee", UriKind.Relative));
+
+        HttpResponseMessage response = await httpClient.SendAsync(message);
+        return response;
+    }
+
+
+    private static async Task<HttpResponseMessage> RequestWithCertificateAndHttp2()
+    {
         HttpClient httpClient = new(GetDelegatingHandler())
         {
             BaseAddress = new Uri(
@@ -26,11 +50,9 @@ internal static class Program
             requestUri: new Uri("employee", UriKind.Relative));
 
         message.Version = HttpVersion.Version20;
-        var version = message.Version.ToString();
 
         HttpResponseMessage response = await httpClient.SendAsync(message);
-
-        Console.WriteLine(response.StatusCode);
+        return response;
     }
 
     private static DelegatingHandler GetDelegatingHandler()
@@ -43,32 +65,12 @@ internal static class Program
 
     private static HttpClientHandler GetHttpMessageHandler()
     {
-        HttpClientHandler httpClientHandler = new()
+        return new HttpClientHandler()
         {
             //This should not be used in prod
             ServerCertificateCustomValidationCallback
                 = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
         };
-
-        httpClientHandler.ClientCertificates.Add(LoadCertificateFromStore());
-
-
-        return httpClientHandler;
-    }
-
-    private static X509Certificate2 LoadCertificateFromStore()
-    {
-        using var store = new X509Store(
-            StoreLocation.CurrentUser);
-
-        store.Open(OpenFlags.ReadOnly);
-
-        var certificate = store.Certificates.Find(
-            X509FindType.FindByIssuerName,
-            "localhost",
-            validOnly: false);
-
-        return certificate[0];
     }
 
     private static void CreateLogger()
